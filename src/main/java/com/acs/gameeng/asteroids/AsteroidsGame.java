@@ -12,8 +12,8 @@ public class AsteroidsGame extends ACSGameEngine {
     List<SpaceObject> asteroids;
 
 
-    private AsteroidsGame(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen) {
-        super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen);
+    private AsteroidsGame(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean screen, boolean useRetina) {
+        super(screenWidth, screenHeight, pixelWidth, pixelHeight, screen, useRetina);
     }
 
     @Override
@@ -26,19 +26,18 @@ public class AsteroidsGame extends ACSGameEngine {
 
     @Override
     public boolean onUserUpdate(float fElapsedTime) {
-        clear(Pixel.WHITE);
+        clear(Pixel.BLACK);
         draw(0,0, Pixel.WHITE);
-//        System.out.println(fElapsedTime);
-//        for (SpaceObject a : asteroids) {
-//            a.x += a.dx * fElapsedTime;
-//            a.y += a.dy * fElapsedTime;
-//
-//            for (int x = 0; x < a.size; x++) {
-//                for (int y = 0; y < a.size; y++) {
-//                    draw((int) a.x + x, (int) a.y + y, Pixel.RED);
-//                }
-//            }
-//        }
+        for (SpaceObject a : asteroids) {
+            a.x += a.dx * fElapsedTime;
+            a.y += a.dy * fElapsedTime;
+
+            for (int x = 0; x < a.size; x++) {
+                for (int y = 0; y < a.size; y++) {
+                    draw((int) a.x + x, (int) a.y + y, Pixel.RED);
+                }
+            }
+        }
         return true;
     }
 
@@ -48,7 +47,16 @@ public class AsteroidsGame extends ACSGameEngine {
     }
 
     public static void main(String[] args) {
-        AsteroidsGame tetrisGame = new AsteroidsGame(160, 100, 4, 4, false);
+        boolean useRetina = false;
+        for (String s : args) {
+            if(s.startsWith("--useRetina")){
+                String[] split = s.split("=");
+                if(split[1].equals("true")){
+                    useRetina = true;
+                }
+            }
+        }
+        AsteroidsGame tetrisGame = new AsteroidsGame(160, 100, 4, 4, false, useRetina);
         tetrisGame.start();
     }
 }
