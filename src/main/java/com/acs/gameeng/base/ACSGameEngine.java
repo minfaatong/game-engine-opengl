@@ -9,10 +9,42 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.IntBuffer;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.Math.abs;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_C;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_F;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_G;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_H;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_I;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_J;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_K;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_L;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_U;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Y;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
@@ -77,6 +109,9 @@ public abstract class ACSGameEngine {
   private Sprite drawTarget;
   private boolean atomActive;
 
+//  static std::map<uint16_t, uint8_t> mapKeys;
+  private static Map<Integer, Key> mapKeys = new HashMap<>();
+
   private long window;
   private int viewWidth;
   private int viewHeight;
@@ -89,6 +124,10 @@ public abstract class ACSGameEngine {
   private int scaleFactor = 1;
 
   GLFWKeyCallback keyCallback;
+
+  private boolean[] keyNewState = new boolean[300];
+  private boolean[] keyOldState = new boolean[300];
+  private HardwareButton[] keyboardState = new HardwareButton[300];
 
   public abstract boolean onUserCreate();
 
@@ -136,9 +175,9 @@ public abstract class ACSGameEngine {
     fSubPixelOffsetY = oy * this.pixelY;
   }
 
+
   private void loop() {
     GL.createCapabilities();
-
 
     glViewport(this.viewX, this.viewY, this.viewWidth * this.scaleFactor, this.viewHeight * this.scaleFactor);
 
@@ -165,46 +204,72 @@ public abstract class ACSGameEngine {
     // the window or has pressed the ESCAPE key.
     while (!glfwWindowShouldClose(window) && atomActive) {
 
-      tp2 = Instant.now();
-      long elapsedTime = ChronoUnit.MILLIS.between(tp1, tp2);
+      while(!glfwWindowShouldClose(window) && atomActive) {
+        tp2 = Instant.now();
+        long elapsedTime = ChronoUnit.MILLIS.between(tp1, tp2);
 
-      tp1 = tp2;
+        tp1 = tp2;
 
-      if (!onUserUpdate(elapsedTime / 1000.0f))
-        atomActive = false;
+        // Handle User Input - Keyboard
+        for (int i = 0; i < Key.values().length; i++)
+        {
+          Key k = Key.values()[i];
+          keyboardState[k.getValue()].pressed = false;
+          keyboardState[k.getValue()].released = false;
 
-      glViewport(this.viewX, this.viewY, this.viewWidth * this.scaleFactor, this.viewHeight * this.scaleFactor);
+          if (keyNewState[k.getValue()] != keyOldState[k.getValue()])
+          {
+            if (keyNewState[k.getValue()])
+            {
+              keyboardState[k.getValue()].pressed = !keyboardState[k.getValue()].held;
+              keyboardState[k.getValue()].held = true;
+            }
+            else
+            {
+              keyboardState[k.getValue()].released = true;
+              keyboardState[k.getValue()].held = false;
+            }
+          }
 
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+          keyOldState[k.getValue()] = keyNewState[k.getValue()];
+        }
 
-      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this.screenWidth, this.screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, this.drawTarget.getData());
+        if (!onUserUpdate(elapsedTime/1000.0f))
+          atomActive = false;
 
-      // Display texture on screen
-      glBegin(GL_QUADS);
-      glTexCoord2f(0.0f, 1.0f);
-      glVertex3f(-1.0f + (fSubPixelOffsetX), -1.0f + (fSubPixelOffsetY), 0.0f);
-      glTexCoord2f(0.0f, 0.0f);
-      glVertex3f(-1.0f + (fSubPixelOffsetX), 1.0f + (fSubPixelOffsetY), 0.0f);
-      glTexCoord2f(1.0f, 0.0f);
-      glVertex3f(1.0f + (fSubPixelOffsetX), 1.0f + (fSubPixelOffsetY), 0.0f);
-      glTexCoord2f(1.0f, 1.0f);
-      glVertex3f(1.0f + (fSubPixelOffsetX), -1.0f + (fSubPixelOffsetY), 0.0f);
-      glEnd();
+        glViewport(this.viewX, this.viewY, this.viewWidth * this.scaleFactor, this.viewHeight * this.scaleFactor);
 
-      glfwSwapBuffers(window); // swap the color buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-      // Poll for window events. The key callback above will only be
-      // invoked during this call.
-      glfwPollEvents();
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this.screenWidth, this.screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, this.drawTarget.getData());
 
-      // Allow the user to free resources if they have overrided the destroy function
-      if (onUserDestroy()) {
-        // User has permitted destroy, so exit and clean up
-      } else {
-        // User denied destroy for some reason, so continue running
-        atomActive = true;
+        // Display texture on screen
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3f(-1.0f + (fSubPixelOffsetX), -1.0f + (fSubPixelOffsetY), 0.0f);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-1.0f + (fSubPixelOffsetX), 1.0f + (fSubPixelOffsetY), 0.0f);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3f(1.0f + (fSubPixelOffsetX), 1.0f + (fSubPixelOffsetY), 0.0f);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3f(1.0f + (fSubPixelOffsetX), -1.0f + (fSubPixelOffsetY), 0.0f);
+        glEnd();
+
+        glfwSwapBuffers(window); // swap the color buffers
+
+        // Poll for window events. The key callback above will only be
+        // invoked during this call.
+        glfwPollEvents();
+
+        // Allow the user to free resources if they have overrided the destroy function
+        if (onUserDestroy()) {
+          // User has permitted destroy, so exit and clean up
+        } else {
+          // User denied destroy for some reason, so continue running
+          atomActive = true;
+        }
+
       }
-
     }
     keyCallback.free();
     glfwDestroyWindow(window);
@@ -214,6 +279,12 @@ public abstract class ACSGameEngine {
 
   private boolean windowCreate() {
     init();
+
+    for (int i = 0; i < Key.values().length; i++) {
+      Key value = Key.values()[i];
+      keyboardState[value.getValue()] = new HardwareButton();
+    }
+
     return true;
   }
 
@@ -245,8 +316,19 @@ public abstract class ACSGameEngine {
     // Setup a key callback. It will be called every time a key is pressed, repeated or released.
     glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
       public void invoke(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
           glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+        }
+        else {
+          System.out.println("key: " + key);
+          System.out.println("action: " + action);
+          if(action == 1){
+            ACSGameEngine.this.keyNewState[key] = true;
+          } else if(action == 0){
+            ACSGameEngine.this.keyNewState[key] = false;
+          }
+        }
+
       }
     });
     // Get the thread stack and push a new frame
@@ -277,6 +359,9 @@ public abstract class ACSGameEngine {
     glfwShowWindow(window);
   }
 
+  public HardwareButton getKey(Key key){
+    return keyboardState[key.getValue()];
+  }
   void updateViewport() {
     int ww = this.screenWidth * this.pixelWidth;
     int wh = this.screenHeight * this.pixelHeight;

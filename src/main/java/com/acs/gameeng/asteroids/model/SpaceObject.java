@@ -6,8 +6,9 @@ public class SpaceObject {
     public float dx;
     public float dy;
     public int size;
+    public float angle;
 
-    public SpaceObject(int x, int y, int dx, int dy, int size) {
+    public SpaceObject(int x, int y, int dx, int dy, int size, float angle) {
 
         this.x = x;
         this.y = y;
