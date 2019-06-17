@@ -147,7 +147,6 @@ public abstract class ACSGameEngine {
     this.useRetina = useRetina;
     this.scaleFactor = useRetina ? 2 : 1;
 
-
     if (pixelWidth == 0 || pixelHeight == 0 || screenWidth == 0 || screenHeight == 0)
       throw new IllegalArgumentException();
 
@@ -320,8 +319,6 @@ public abstract class ACSGameEngine {
           glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         }
         else {
-          System.out.println("key: " + key);
-          System.out.println("action: " + action);
           if(action == 1){
             ACSGameEngine.this.keyNewState[key] = true;
           } else if(action == 0){
