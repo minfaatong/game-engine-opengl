@@ -16,4 +16,16 @@ public class SpaceObject {
         this.dy = dy;
         this.size = size;
     }
+
+    @Override
+    public String toString() {
+        return "SpaceObject{" +
+                "x=" + x +
+                ", y=" + y +
+                ", dx=" + dx +
+                ", dy=" + dy +
+                ", size=" + size +
+                ", angle=" + angle +
+                '}';
+    }
 }
