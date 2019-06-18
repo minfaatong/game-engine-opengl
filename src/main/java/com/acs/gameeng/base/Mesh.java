@@ -16,6 +16,24 @@ public class Mesh {
     public Mesh() {
 
     }
+
+    public Mesh(float[][] data) {
+
+        List<Vector3D> listOfVectors = new ArrayList<>();
+        for (float[] datum : data) {
+            listOfVectors.add(new Vector3D(datum[0], datum[1], datum[2]));
+            listOfVectors.add(new Vector3D(datum[3], datum[4], datum[5]));
+            listOfVectors.add(new Vector3D(datum[6], datum[7], datum[8]));
+        }
+
+        for (int i = 0; i < listOfVectors.size(); i = i + 3) {
+            Vector3D v1 = listOfVectors.get(i);
+            Vector3D v2 = listOfVectors.get(i + 1);
+            Vector3D v3 = listOfVectors.get(i + 2);
+            tris.add(new Triangle(v1,v2,v3));
+        }
+
+    }
     public Mesh(String filename) {
         loadMesh(filename);
     }
