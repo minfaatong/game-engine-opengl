@@ -5,6 +5,7 @@ import com.acs.gameeng.base.Key;
 import com.acs.gameeng.base.Matrix4x4;
 import com.acs.gameeng.base.Mesh;
 import com.acs.gameeng.base.Pixel;
+import com.acs.gameeng.base.Triangle;
 import com.acs.gameeng.base.Vector3D;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class ThreeDEngine extends ACSGameEngine {
 
 
   @Override
-  public boolean onUserUpdate(float elapsedTime) {
+  public boolean onUserUpdate(double elapsedTime) {
 
     if (getKey(Key.DOWN).held) {
       vCamera.y += 8.0f * elapsedTime;
@@ -54,7 +55,7 @@ public class ThreeDEngine extends ACSGameEngine {
       vCamera.x += 8.0f * elapsedTime;
     }
 
-    Vector3D forward = multiplyVector(vLookAt, 8.0f * elapsedTime);
+    Vector3D forward = multiplyVector(vLookAt, 8.0 * elapsedTime);
 
     if (getKey(Key.W).held) {
       vCamera = addVector(vCamera, forward);
@@ -147,9 +148,9 @@ public class ThreeDEngine extends ACSGameEngine {
 
           triProjected.pixel = triTransformed.pixel;
 
-          triProjected.points[0] = divideVector(triProjected.points[0], triProjected.points[0].w);
-          triProjected.points[1] = divideVector(triProjected.points[1], triProjected.points[1].w);
-          triProjected.points[2] = divideVector(triProjected.points[2], triProjected.points[2].w);
+//          triProjected.points[0] = divideVector(triProjected.points[0], triProjected.points[0].w);
+//          triProjected.points[1] = divideVector(triProjected.points[1], triProjected.points[1].w);
+//          triProjected.points[2] = divideVector(triProjected.points[2], triProjected.points[2].w);
 
           Vector3D offsetView = new Vector3D(1, 1, 0);
           // Scale into view
@@ -170,12 +171,12 @@ public class ThreeDEngine extends ACSGameEngine {
       }
     }
 
-    //Sort triangles back to front
-    trianglesToRaster.sort((t1, t2) -> {
-      float z1 = (t1.points[0].z + t1.points[1].z + t1.points[2].z) / 3.0f;
-      float z2 = (t2.points[0].z + t2.points[1].z + t2.points[2].z) / 3.0f;
-      return Float.compare(z2, z1);
-    });
+//    //Sort triangles back to front
+//    trianglesToRaster.sort((t1, t2) -> {
+//      float z1 = (t1.points[0].z + t1.points[1].z + t1.points[2].z) / 3.0f;
+//      float z2 = (t2.points[0].z + t2.points[1].z + t2.points[2].z) / 3.0f;
+//      return Float.compare(z2, z1);
+//    });
 
     clear(Pixel.BLACK);
 
@@ -212,15 +213,15 @@ public class ThreeDEngine extends ACSGameEngine {
       }
 
       for (Triangle triangle : listTriangles) {
-        fillTriangle(triangle.points[0].x, triangle.points[0].y,
-            triangle.points[1].x, triangle.points[1].y,
-            triangle.points[2].x, triangle.points[2].y,
-            Pixel.WHITE);
-
-        drawTriangle(triangle.points[0].x, triangle.points[0].y,
-            triangle.points[1].x, triangle.points[1].y,
-            triangle.points[2].x, triangle.points[2].y,
-            Pixel.BLACK);
+//        fillTriangle(triangle.points[0].x, triangle.points[0].y,
+//            triangle.points[1].x, triangle.points[1].y,
+//            triangle.points[2].x, triangle.points[2].y,
+//            Pixel.WHITE);
+//
+//        drawTriangle(triangle.points[0].x, triangle.points[0].y,
+//            triangle.points[1].x, triangle.points[1].y,
+//            triangle.points[2].x, triangle.points[2].y,
+//            Pixel.BLACK);
       }
 
 
@@ -258,7 +259,7 @@ public class ThreeDEngine extends ACSGameEngine {
     return new Vector3D(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
   }
 
-  private Vector3D multiplyVector(Vector3D v1, float k) {
+  private Vector3D multiplyVector(Vector3D v1, double k) {
     return new Vector3D(v1.x * k, v1.y * k, v1.z * k);
   }
 
@@ -267,7 +268,7 @@ public class ThreeDEngine extends ACSGameEngine {
   }
 
   private float vectorDotProduct(Vector3D v1, Vector3D v2) {
-    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+    return (float) (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
   }
 
   private float vectorLength(Vector3D v) {
@@ -423,7 +424,7 @@ public class ThreeDEngine extends ACSGameEngine {
 
   private float dist(Vector3D p, Vector3D plane_p, Vector3D plane_n) {
     Vector3D n = vectorNormalize(p);
-    return (plane_n.x * p.x + plane_n.y * p.y + plane_n.z * p.z - vectorDotProduct(plane_n, plane_p));
+    return (float) (plane_n.x * p.x + plane_n.y * p.y + plane_n.z * p.z - vectorDotProduct(plane_n, plane_p));
   }
 
   public static void main(String[] args) {

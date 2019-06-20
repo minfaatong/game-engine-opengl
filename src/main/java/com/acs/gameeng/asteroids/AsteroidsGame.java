@@ -50,7 +50,7 @@ public class AsteroidsGame extends ACSGameEngine {
     }
 
     @Override
-    public boolean onUserUpdate(float fElapsedTime) {
+    public boolean onUserUpdate(double fElapsedTime) {
         clear(Pixel.BLACK);
 
         if (getKey(Key.LEFT).held) {

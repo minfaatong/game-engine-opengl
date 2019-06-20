@@ -1,7 +1,5 @@
 package com.acs.gameeng.base;
 
-import com.acs.gameeng.game.Triangle;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,21 +17,16 @@ public class Mesh {
 
     public Mesh(float[][] data) {
 
-        List<Vector3D> listOfVectors = new ArrayList<>();
         for (float[] datum : data) {
-            listOfVectors.add(new Vector3D(datum[0], datum[1], datum[2]));
-            listOfVectors.add(new Vector3D(datum[3], datum[4], datum[5]));
-            listOfVectors.add(new Vector3D(datum[6], datum[7], datum[8]));
+            Vector3D v1 = new Vector3D(datum[0], datum[1], datum[2]);
+            Vector3D v2 = new Vector3D(datum[3], datum[4], datum[5]);
+            Vector3D v3 = new Vector3D(datum[6], datum[7], datum[8]);
+            tris.add(new Triangle(v1, v2, v3));
         }
 
-        for (int i = 0; i < listOfVectors.size(); i = i + 3) {
-            Vector3D v1 = listOfVectors.get(i);
-            Vector3D v2 = listOfVectors.get(i + 1);
-            Vector3D v3 = listOfVectors.get(i + 2);
-            tris.add(new Triangle(v1,v2,v3));
-        }
 
     }
+
     public Mesh(String filename) {
         loadMesh(filename);
     }

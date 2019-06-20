@@ -20,7 +20,7 @@ public class TetrisGame extends ACSGameEngine {
     int b = 0;
 
     @Override
-    public boolean onUserUpdate(float fElapsedTime) {
+    public boolean onUserUpdate(double fElapsedTime) {
         clear(Pixel.BLACK);
 
         draw(2,0, new Pixel(255,0,0,255));

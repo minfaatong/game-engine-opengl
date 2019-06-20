@@ -1,11 +1,8 @@
-package com.acs.gameeng.game;
-
-import com.acs.gameeng.base.Pixel;
-import com.acs.gameeng.base.Vector3D;
+package com.acs.gameeng.base;
 
 public class Triangle {
-    Vector3D[] points ;
-    Pixel pixel;
+    public Vector3D[] points ;
+    public Pixel pixel;
 
     public Triangle() {
         points = new Vector3D[3];

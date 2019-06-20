@@ -4,77 +4,174 @@ import com.acs.gameeng.base.ACSGameEngine;
 import com.acs.gameeng.base.Matrix4x4;
 import com.acs.gameeng.base.Mesh;
 import com.acs.gameeng.base.Pixel;
+import com.acs.gameeng.base.Triangle;
+import com.acs.gameeng.base.Vector3D;
+
 
 public class ThreeDEngine2 extends ACSGameEngine {
 
-  private Mesh meshCube;
-  private Matrix4x4 projectionMatrix;
+    private Mesh meshCube;
+    private Matrix4x4 projectionMatrix;
+    private double theta = 0.0;
 
-  protected ThreeDEngine2(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen, boolean useRetina) {
-    super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, useRetina);
-  }
+    protected ThreeDEngine2(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen, boolean useRetina) {
+        super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, useRetina);
+    }
 
-  @Override
-  public boolean onUserCreate() {
-    meshCube = new Mesh(new float[][] {
-        // SOUTH
-        { 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
-        { 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
+    @Override
+    public boolean onUserCreate() {
+        meshCube = new Mesh(new float[][]{
+                // SOUTH
+                {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
+                {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
 
-        // EAST
-        { 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f },
-        { 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 1.0f },
+                // EAST
+                {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
+                {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
 
-        // NORTH
-        { 1.0f, 0.0f, 1.0f,    1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 1.0f },
-        { 1.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f },
+                // NORTH
+                {1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
+                {1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
 
-        // WEST
-        { 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f },
-        { 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f },
+                // WEST
+                {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+                {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
 
-        // TOP
-        { 0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f },
-        { 0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 0.0f },
+                // TOP
+                {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+                {0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
 
-        // BOTTOM
-        { 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f },
-        { 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
-    });
+                // BOTTOM
+                {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
+                {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+        });
 
-    // projection matrix
-    double near = 0.1;
-    double far = 1000.0;
-    double fieldOfView = 90.0;
-    double aspectRatio = screenHeight()/screenWidth();
-    double fieldOfViewRadians = 1.0 / Math.tan(fieldOfView * 0.5 / 180.0 * Math.PI);
+        // Projection Matrix
+        double near = 0.1;
+        double far = 1000.0;
+        double fov = 90.0;
+        double aspectRatio = (double)screenHeight() / (double)screenWidth();
+        double fovRad = 1.0 / Math.tan(fov * 0.5 / 180.0 * Math.PI);
 
-    projectionMatrix = new Matrix4x4();
-    projectionMatrix.m[0][0] = aspectRatio * fieldOfViewRadians;
-    projectionMatrix.m[1][1] = fieldOfViewRadians;
-    //https://youtu.be/ih20l3pJoeU?t=1827
-
-    return true;
-  }
-
-  @Override
-  public boolean onUserUpdate(float fElapsedTime) {
-    clear(Pixel.BLACK);
-    return true;
-  }
-
-  @Override
-  public boolean onUserDestroy() {
-    return false;
-  }
-
-  public static void main(String[] args) {
-    int pixelDim = 2;
-
-    ThreeDEngine2 acsGameEngine = new ThreeDEngine2(256, 240, pixelDim, pixelDim, false, true);
-
-    acsGameEngine.start();
+        projectionMatrix = new Matrix4x4();
+        projectionMatrix.m[0][0] = aspectRatio * fovRad;
+        projectionMatrix.m[1][1] = fovRad;
+        projectionMatrix.m[2][2] = far / (far - near);
+        projectionMatrix.m[3][2] = (-far * near) / (far - near);
+        projectionMatrix.m[2][3] = 1.0;
+        projectionMatrix.m[3][3] = 0.0;
 
 
-  }
+        return true;
+    }
+
+    @Override
+    public boolean onUserUpdate(double elapsedTime) {
+        clear(Pixel.BLACK);
+
+        Matrix4x4 matrixRotationZ = new Matrix4x4();
+        Matrix4x4 matrixRotationX = new Matrix4x4();
+
+        theta += 1.0f * elapsedTime;
+
+        // Rotation Z
+        matrixRotationZ.m[0][0] = Math.cos(theta);
+        matrixRotationZ.m[0][1] = Math.sin(theta);
+        matrixRotationZ.m[1][0] = -Math.sin(theta);
+        matrixRotationZ.m[1][1] = Math.cos(theta);
+        matrixRotationZ.m[2][2] = 1;
+        matrixRotationZ.m[3][3] = 1;
+
+        // Rotation X
+        matrixRotationX.m[0][0] = 1;
+        matrixRotationX.m[1][1] = Math.cos(theta * 0.5f);
+        matrixRotationX.m[1][2] = Math.sin(theta * 0.5f);
+        matrixRotationX.m[2][1] = -Math.sin(theta * 0.5f);
+        matrixRotationX.m[2][2] = Math.cos(theta * 0.5f);
+        matrixRotationX.m[3][3] = 1;
+
+        for (Triangle tri : meshCube.tris) {
+
+            Triangle triangleRotatedZ = new Triangle();
+            triangleRotatedZ.points[0] = multiplyMatrixVector(matrixRotationZ, tri.points[0]);
+            triangleRotatedZ.points[1] = multiplyMatrixVector(matrixRotationZ, tri.points[1]);
+            triangleRotatedZ.points[2] = multiplyMatrixVector(matrixRotationZ, tri.points[2]);
+
+            Triangle triangleRotatedZX = new Triangle();
+            triangleRotatedZX.points[0] = multiplyMatrixVector(matrixRotationX, triangleRotatedZ.points[0]);
+            triangleRotatedZX.points[1] = multiplyMatrixVector(matrixRotationX, triangleRotatedZ.points[1]);
+            triangleRotatedZX.points[2] = multiplyMatrixVector(matrixRotationX, triangleRotatedZ.points[2]);
+
+            Triangle triangleTranslated = Triangle.copy(triangleRotatedZX);
+
+            triangleTranslated.points[0].z = triangleRotatedZX.points[0].z + 3.0;
+            triangleTranslated.points[1].z = triangleRotatedZX.points[1].z + 3.0;
+            triangleTranslated.points[2].z = triangleRotatedZX.points[2].z + 3.0;
+
+
+            Triangle triangleProjected = new Triangle();
+            triangleProjected.points[0] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[0]);
+            triangleProjected.points[1] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[1]);
+            triangleProjected.points[2] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[2]);
+
+            // scale into view
+            triangleProjected.points[0].x += 1.0f; triangleProjected.points[0].y += 1.0f;
+            triangleProjected.points[1].x += 1.0f; triangleProjected.points[1].y += 1.0f;
+            triangleProjected.points[2].x += 1.0f; triangleProjected.points[2].y += 1.0f;
+
+            triangleProjected.points[0].x *= 0.5f * screenWidth();
+            triangleProjected.points[0].y *= 0.5f * screenHeight();
+            triangleProjected.points[1].x *= 0.5f * screenWidth();
+            triangleProjected.points[1].y *= 0.5f * screenHeight();
+            triangleProjected.points[2].x *= 0.5f * screenWidth();
+            triangleProjected.points[2].y *= 0.5f * screenHeight();
+
+            drawTriangle(triangleProjected, Pixel.WHITE);
+
+
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onUserDestroy() {
+        return false;
+    }
+
+    private Vector3D multiplyMatrixVector(Matrix4x4 matrix, Vector3D input) {
+        Vector3D output = new Vector3D();
+
+
+        output.x = input.x * matrix.m[0][0] + input.y * matrix.m[1][0] + input.z * matrix.m[2][0] + matrix.m[3][0];
+        output.y = input.x * matrix.m[0][1] + input.y * matrix.m[1][1] + input.z * matrix.m[2][1] + matrix.m[3][1];
+        output.z = input.x * matrix.m[0][2] + input.y * matrix.m[1][2] + input.z * matrix.m[2][2] + matrix.m[3][2];
+        double w = input.x * matrix.m[0][3] + input.y * matrix.m[1][3] + input.z * matrix.m[2][3] + matrix.m[3][3];
+
+        if (w > 0.0) {
+            output.x /= w;
+            output.y /= w;
+            output.z /= w;
+        }
+        return output;
+
+
+        /*
+         Vector3D v = new Vector3D();
+    v.x = input.x * matrix.m[0][0] + input.y * matrix.m[1][0] + input.z * matrix.m[2][0] + matrix.m[3][0];
+    v.y = input.x * matrix.m[0][1] + input.y * matrix.m[1][1] + input.z * matrix.m[2][1] + matrix.m[3][1];
+    v.z = input.x * matrix.m[0][2] + input.y * matrix.m[1][2] + input.z * matrix.m[2][2] + matrix.m[3][2];
+    v.w = input.x * matrix.m[0][3] + input.y * matrix.m[1][3] + input.z * matrix.m[2][3] + matrix.m[3][3];
+    return v;
+         */
+    }
+
+    public static void main(String[] args) {
+        int pixelDim = 4;
+
+        ThreeDEngine2 acsGameEngine = new ThreeDEngine2(256, 240, pixelDim, pixelDim, false, false);
+
+        acsGameEngine.start();
+
+
+    }
 }
