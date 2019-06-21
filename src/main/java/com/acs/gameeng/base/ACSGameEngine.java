@@ -501,8 +501,15 @@ public abstract class ACSGameEngine {
         drawTriangle((int) x1, (int) y1, (int) x2, (int) y2, (int) x3, (int) y3, p);
     }
 
-    public void fillTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Pixel p) {
+    public void fillTriangle(double x1, double y1, double x2, double y2, double x3, double y3, Pixel p) {
         fillTriangle((int) x1, (int) y1, (int) x2, (int) y2, (int) x3, (int) y3, p);
+    }
+
+    public void fillTriangle(Triangle triangle, Pixel pixel){
+        fillTriangle(triangle.points[0].x, triangle.points[0].y,
+                triangle.points[1].x, triangle.points[1].y,
+                triangle.points[2].x, triangle.points[2].y,
+                pixel);
     }
 
     //    http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html

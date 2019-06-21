@@ -7,12 +7,17 @@ import com.acs.gameeng.base.Pixel;
 import com.acs.gameeng.base.Triangle;
 import com.acs.gameeng.base.Vector3D;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 
 public class ThreeDEngine2 extends ACSGameEngine {
 
     private Mesh meshCube;
     private Matrix4x4 projectionMatrix;
     private double theta = 0.0;
+    private Vector3D camera;
 
     protected ThreeDEngine2(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen, boolean useRetina) {
         super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, useRetina);
@@ -20,31 +25,8 @@ public class ThreeDEngine2 extends ACSGameEngine {
 
     @Override
     public boolean onUserCreate() {
-        meshCube = new Mesh(new float[][]{
-                // SOUTH
-                {0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f},
-                {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-
-                // EAST
-                {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
-                {1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
-
-                // NORTH
-                {1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f},
-                {1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-
-                // WEST
-                {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
-                {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-
-                // TOP
-                {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-                {0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-
-                // BOTTOM
-                {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-                {1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-        });
+        camera = new Vector3D();
+        meshCube = new Mesh("objects/ship.obj");
 
         // Projection Matrix
         double near = 0.1;
@@ -104,33 +86,94 @@ public class ThreeDEngine2 extends ACSGameEngine {
 
             Triangle triangleTranslated = Triangle.copy(triangleRotatedZX);
 
-            triangleTranslated.points[0].z = triangleRotatedZX.points[0].z + 3.0;
-            triangleTranslated.points[1].z = triangleRotatedZX.points[1].z + 3.0;
-            triangleTranslated.points[2].z = triangleRotatedZX.points[2].z + 3.0;
+            triangleTranslated.points[0].z = triangleRotatedZX.points[0].z + 8.0;
+            triangleTranslated.points[1].z = triangleRotatedZX.points[1].z + 8.0;
+            triangleTranslated.points[2].z = triangleRotatedZX.points[2].z + 8.0;
 
 
-            Triangle triangleProjected = new Triangle();
-            triangleProjected.points[0] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[0]);
-            triangleProjected.points[1] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[1]);
-            triangleProjected.points[2] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[2]);
+            Vector3D line1 = subtactVector(triangleTranslated.points[1], triangleTranslated.points[0]);
+            Vector3D line2 = subtactVector(triangleTranslated.points[2], triangleTranslated.points[0]);
+            Vector3D normal = vectorCrossProduct(line1, line2);
 
-            // scale into view
-            triangleProjected.points[0].x += 1.0f; triangleProjected.points[0].y += 1.0f;
-            triangleProjected.points[1].x += 1.0f; triangleProjected.points[1].y += 1.0f;
-            triangleProjected.points[2].x += 1.0f; triangleProjected.points[2].y += 1.0f;
+            normal = vectorNormalize(normal);
 
-            triangleProjected.points[0].x *= 0.5f * screenWidth();
-            triangleProjected.points[0].y *= 0.5f * screenHeight();
-            triangleProjected.points[1].x *= 0.5f * screenWidth();
-            triangleProjected.points[1].y *= 0.5f * screenHeight();
-            triangleProjected.points[2].x *= 0.5f * screenWidth();
-            triangleProjected.points[2].y *= 0.5f * screenHeight();
+            List<Triangle> trianglesToRaster = new ArrayList<>();
 
-            drawTriangle(triangleProjected, Pixel.WHITE);
+            if (normal.x * (triangleTranslated.points[0].x - camera.x) +
+                normal.y * (triangleTranslated.points[0].y - camera.y) +
+                normal.z * (triangleTranslated.points[0].z - camera.z) < 0) {
 
+
+                Vector3D lightDirection = new Vector3D(0,0,-1);
+                lightDirection = vectorNormalize(lightDirection);
+
+                double dotProduct = vectorDotProduct(normal, lightDirection);
+
+                triangleTranslated.pixel = getColour(dotProduct);
+
+                Triangle triangleProjected = new Triangle();
+                triangleProjected.points[0] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[0]);
+                triangleProjected.points[1] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[1]);
+                triangleProjected.points[2] = multiplyMatrixVector(projectionMatrix, triangleTranslated.points[2]);
+                triangleProjected.pixel = triangleTranslated.pixel;
+                // scale into view
+                triangleProjected.points[0].x += 1.0f;
+                triangleProjected.points[0].y += 1.0f;
+                triangleProjected.points[1].x += 1.0f;
+                triangleProjected.points[1].y += 1.0f;
+                triangleProjected.points[2].x += 1.0f;
+                triangleProjected.points[2].y += 1.0f;
+
+                triangleProjected.points[0].x *= 0.5f * screenWidth();
+                triangleProjected.points[0].y *= 0.5f * screenHeight();
+                triangleProjected.points[1].x *= 0.5f * screenWidth();
+                triangleProjected.points[1].y *= 0.5f * screenHeight();
+                triangleProjected.points[2].x *= 0.5f * screenWidth();
+                triangleProjected.points[2].y *= 0.5f * screenHeight();
+
+                trianglesToRaster.add(triangleProjected);
+            }
+
+            trianglesToRaster.sort((t1, t2) -> {
+                double z1 = (t1.points[0].z + t1.points[1].z + t1.points[2].z) / 3.0f;
+                double z2 = (t2.points[0].z + t2.points[1].z + t2.points[2].z) / 3.0f;
+                return Double.compare(z2, z1);
+            });
+
+            for (Triangle triangle : trianglesToRaster) {
+                fillTriangle(triangle, triangle.pixel);
+            }
 
         }
         return true;
+    }
+
+    private Pixel getColour(double luminance) {
+        int value = (int) (255 * luminance);
+        return new Pixel(value, value, value);
+    }
+
+    private Vector3D subtactVector(Vector3D v1, Vector3D v2) {
+        return new Vector3D(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+    }
+
+    private Vector3D vectorCrossProduct(Vector3D v1, Vector3D v2) {
+        return new Vector3D(v1.y * v2.z - v1.z * v2.y,
+                v1.z * v2.x - v1.x * v2.z,
+                v1.x * v2.y - v1.y * v2.x);
+    }
+
+    private double vectorDotProduct(Vector3D v1, Vector3D v2) {
+        return (v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
+    }
+
+    private double vectorLength(Vector3D v) {
+        return Math.sqrt(vectorDotProduct(v, v));
+    }
+
+    private Vector3D vectorNormalize(Vector3D v) {
+        double l = vectorLength(v);
+        return new Vector3D(v.x / l, v.y / l, v.z / l);
     }
 
     @Override
@@ -153,25 +196,11 @@ public class ThreeDEngine2 extends ACSGameEngine {
             output.z /= w;
         }
         return output;
-
-
-        /*
-         Vector3D v = new Vector3D();
-    v.x = input.x * matrix.m[0][0] + input.y * matrix.m[1][0] + input.z * matrix.m[2][0] + matrix.m[3][0];
-    v.y = input.x * matrix.m[0][1] + input.y * matrix.m[1][1] + input.z * matrix.m[2][1] + matrix.m[3][1];
-    v.z = input.x * matrix.m[0][2] + input.y * matrix.m[1][2] + input.z * matrix.m[2][2] + matrix.m[3][2];
-    v.w = input.x * matrix.m[0][3] + input.y * matrix.m[1][3] + input.z * matrix.m[2][3] + matrix.m[3][3];
-    return v;
-         */
     }
 
     public static void main(String[] args) {
         int pixelDim = 4;
-
         ThreeDEngine2 acsGameEngine = new ThreeDEngine2(256, 240, pixelDim, pixelDim, false, false);
-
         acsGameEngine.start();
-
-
     }
 }
