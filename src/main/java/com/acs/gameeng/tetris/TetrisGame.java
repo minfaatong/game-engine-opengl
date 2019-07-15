@@ -7,7 +7,7 @@ import com.acs.gameeng.base.Pixel;
 public class TetrisGame extends ACSGameEngine {
 
     protected TetrisGame(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen) {
-        super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, false);
+        super(screenWidth, screenHeight, pixelWidth, pixelHeight,"tetris", fullScreen, false);
     }
 
     @Override

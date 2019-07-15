@@ -11,7 +11,7 @@ public class ThreeDEngine2 extends ACSGameEngine {
   private Matrix4x4 projectionMatrix;
 
   protected ThreeDEngine2(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen, boolean useRetina) {
-    super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, useRetina);
+    super(screenWidth, screenHeight, pixelWidth, pixelHeight,"", fullScreen, useRetina);
   }
 
   @Override

@@ -20,7 +20,7 @@ public class ThreeDEngine extends ACSGameEngine {
   float yaw;
 
   protected ThreeDEngine(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean fullScreen, boolean useRetina) {
-    super(screenWidth, screenHeight, pixelWidth, pixelHeight, fullScreen, useRetina);
+    super(screenWidth, screenHeight, pixelWidth, pixelHeight,"", fullScreen, useRetina);
   }
 
   @Override
@@ -237,10 +237,10 @@ public class ThreeDEngine extends ACSGameEngine {
 
   private Vector3D matrixMultiplyVector(Matrix4x4 matrix, Vector3D input) {
     Vector3D v = new Vector3D();
-    v.x = input.x * matrix.m[0][0] + input.y * matrix.m[1][0] + input.z * matrix.m[2][0] + matrix.m[3][0];
-    v.y = input.x * matrix.m[0][1] + input.y * matrix.m[1][1] + input.z * matrix.m[2][1] + matrix.m[3][1];
-    v.z = input.x * matrix.m[0][2] + input.y * matrix.m[1][2] + input.z * matrix.m[2][2] + matrix.m[3][2];
-    v.w = input.x * matrix.m[0][3] + input.y * matrix.m[1][3] + input.z * matrix.m[2][3] + matrix.m[3][3];
+//    v.x = input.x * matrix.m[0][0] + input.y * matrix.m[1][0] + input.z * matrix.m[2][0] + matrix.m[3][0];
+//    v.y = input.x * matrix.m[0][1] + input.y * matrix.m[1][1] + input.z * matrix.m[2][1] + matrix.m[3][1];
+//    v.z = input.x * matrix.m[0][2] + input.y * matrix.m[1][2] + input.z * matrix.m[2][2] + matrix.m[3][2];
+//    v.w = input.x * matrix.m[0][3] + input.y * matrix.m[1][3] + input.z * matrix.m[2][3] + matrix.m[3][3];
     return v;
   }
 

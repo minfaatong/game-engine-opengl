@@ -20,7 +20,7 @@ public class AsteroidsGame extends ACSGameEngine {
     private List<Point> modelAsteroid;
 
     private AsteroidsGame(int screenWidth, int screenHeight, int pixelWidth, int pixelHeight, boolean screen, boolean useRetina) {
-        super(screenWidth, screenHeight, pixelWidth, pixelHeight, screen, useRetina);
+        super(screenWidth, screenHeight, pixelWidth, pixelHeight,"asteroids",screen, useRetina);
     }
 
     @Override
